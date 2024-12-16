@@ -1,0 +1,90 @@
+/* Sidebar Base */
+.sidebar {
+  height: 100vh;
+  width: 250px;
+  background-color: #1c1c1e;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar.closed {
+  width: 70px;
+}
+
+/* Sidebar Content */
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  border-bottom: 1px solid #333;
+}
+
+.sidebar.closed .sidebar-header h4 {
+  display: none;
+}
+
+/* Nav Links */
+.sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 15px;
+  font-size: 16px;
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar.closed .nav-link {
+  justify-content: center;
+}
+
+.sidebar .nav-link span {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.sidebar.closed .nav-link span {
+  display: none;
+}
+
+/* Toggle Button */
+.toggle-sidebar-btn {
+  position: absolute;
+  top: 10px;
+  right: -15px; /* Slightly overlaps the sidebar */
+  width: 30px;
+  height: 30px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1100;
+  transition: background-color 0.3s ease-in-out;
+  box-shadow: none; /* Flat design */
+}
+
+.toggle-sidebar-btn.closed {
+  right: -10px; /* Adjusted to stay within the collapsed width */
+}
+
+.toggle-sidebar-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Reduce button size on smaller screens */
+@media (max-width: 768px) {
+  .toggle-sidebar-btn {
+    width: 25px;
+    height: 25px;
+    right: -12px;
+  }
+}

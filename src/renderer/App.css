@@ -1,0 +1,51 @@
+/* Fondo del contenedor principal */
+#app-container {
+  background-color: #121212; /* Fondo oscuro */
+  color: #ffffff; /* Texto claro para buen contraste */
+  min-height: 100vh; /* Asegura que el contenido ocupe toda la altura */
+  display: flex;
+  flex-direction: row;
+}
+
+/* Contenido principal */
+.main-content {
+  background-color: #1e1e1e; /* Fondo ligeramente más claro que el contenedor principal */
+  border-radius: 8px; /* Bordes redondeados para una apariencia moderna */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra suave */
+  color: #e0e0e0; /* Color de texto para mejor visibilidad */
+  padding: 20px;
+  margin: 10px; /* Espaciado del contenido principal */
+  overflow: auto; /* Maneja el desbordamiento del contenido */
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  #app-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Transición de desvanecimiento */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+

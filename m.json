@@ -1,0 +1,85 @@
+{
+    "name": "app-de-gestion",
+    "description": "Aplicación de gestión para administrar tareas y proyectos",
+    "keywords": [
+      "gestion",
+      "productividad",
+      "react",
+      "typescript",
+      "electron"
+    ],
+    "homepage": "https://github.com/AldoJosue31/appmode#readme",
+    "bugs": {
+      "url": "https://github.com/AldoJosue31/appmode/issues"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/AldoJosue31/appmode.git"
+    },
+    "license": "MIT",
+    "author": {
+      "name": "Aldo",
+      "email": "aldo@example.com",
+      "url": "https://aldo.com"
+    },
+    "contributors": [
+      {
+        "name": "Aldo",
+        "email": "aldo@example.com",
+        "url": "https://aldo.com"
+      }
+    ],
+    "main": "./src/main.js",
+    "scripts": {
+      "build": "npm run build:main && npm run build:renderer",
+      "build:main": "webpack --config ./config/webpack.config.main.js",
+      "build:renderer": "webpack --config ./config/webpack.config.renderer.js",
+      "start": "npm run build && electron .",
+      "test": "jest"
+    },
+    "browserslist": [
+      "last 2 versions",
+      "not dead"
+    ],
+    "prettier": {
+      "singleQuote": true
+    },
+    "jest": {
+      "moduleDirectories": [
+        "node_modules",
+        "src"
+      ],
+      "moduleFileExtensions": [
+        "js",
+        "jsx",
+        "ts",
+        "tsx"
+      ],
+      "testEnvironment": "jsdom"
+    },
+    "dependencies": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "electron": "^23.0.0"
+    },
+    "devDependencies": {
+      "webpack": "^5.0.0",
+      "webpack-cli": "^4.0.0",
+      "jest": "^29.0.0"
+    },
+    "build": {
+      "productName": "AppDeGestion",
+      "appId": "com.aldogestion.app",
+      "asar": true,
+      "files": [
+        "dist",
+        "node_modules",
+        "package.json"
+      ]
+    },
+    "devEngines": {
+      "node": ">=14.x",
+      "npm": ">=7.x"
+    }
+  }
+  
