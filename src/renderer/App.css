@@ -1,4 +1,8 @@
 /* Fondo del contenedor principal */
+body{
+  background-color: black;
+}
+
 #app-container {
   background-color: #121212; /* Fondo oscuro */
   color: #ffffff; /* Texto claro para buen contraste */

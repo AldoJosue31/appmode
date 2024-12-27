@@ -1,20 +1,214 @@
 .carrito-sidebar {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 300px;
-    background-color: #212529;
-    color: #f8f9fa;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
-    overflow-y: auto;
-    border-left: 2px solid #6c757d;
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  .carrito-sidebar.visible {
-    transform: translateX(0);
-  }
-  
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 400px; /* Más amplio para mayor comodidad */
+  background: #141414; /* Fondo oscuro elegante */
+  color: #e0e0e0; /* Texto claro */
+  box-shadow: -6px 0 15px rgba(0, 0, 0, 0.5); /* Sombra destacada */
+  overflow-y: auto;
+  border-left: 3px solid #282828; /* Bordes suaves */
+  z-index: 1050;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.carrito-sidebar.visible {
+  transform: translateX(0);
+}
+
+.carrito-sidebar h5 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 15px;
+  background: linear-gradient(135deg, #1f1f1f, #2a2a2a); /* Gradiente elegante */
+  color: #ffffff;
+  text-align: center;
+  border-bottom: 2px solid #383838;
+}
+
+.carrito-sidebar .text-muted {
+  color: #b0b0b0 !important; /* Tonos profesionales */
+}
+
+.carrito-sidebar .empty-cart {
+  text-align: center;
+  padding: 30px;
+  font-size: 1rem;
+  color: #a0a0a0;
+  font-style: italic;
+}
+
+.carrito-sidebar .cart-item {
+  background: #1f1f1f; /* Fondo sutil */
+  border-radius: 12px;
+  padding: 15px;
+  margin: 10px 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra suave */
+  transition: all 0.3s ease-in-out;
+}
+
+.carrito-sidebar .cart-item:hover {
+  background: #272727; /* Resalta al pasar el cursor */
+  transform: translateY(-2px); /* Sutil elevación */
+}
+
+.carrito-sidebar .cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.carrito-sidebar .cart-item-header strong {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+.carrito-sidebar .cart-item-header button {
+  background: #ff4d4d; /* Rojo profesional */
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  border-radius: 50%;
+  padding: 5px;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.carrito-sidebar .cart-item-header button:hover {
+  background: #cc3b3b; /* Rojo más oscuro */
+  transform: scale(1.1); /* Feedback visual */
+}
+
+.carrito-sidebar .cart-item p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  color: #d1d1d1;
+}
+
+.carrito-sidebar .cart-item small {
+  color: #9c9c9c; /* Detalles secundarios */
+}
+
+.carrito-sidebar .cart-item .quantity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.carrito-sidebar .cart-item .quantity strong {
+  color: #ffffff;
+}
+
+.carrito-sidebar .cart-item .quantity input {
+  width: 70px;
+  text-align: center;
+  border: 1px solid #383838;
+  background: #1c1c1c;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 5px;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease;
+}
+
+.carrito-sidebar .cart-item .quantity input:focus {
+  outline: none;
+  border-color: #505050;
+}
+
+.carrito-sidebar .cart-footer {
+  padding: 20px;
+  background: #1b1b1b; /* Fondo oscuro */
+  border-top: 2px solid #333333;
+  text-align: center;
+}
+
+.carrito-sidebar .cart-footer button {
+  background: #27ae60; /* Verde profesional */
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  padding: 12px 25px;
+  border-radius: 8px;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.carrito-sidebar .cart-footer button:hover {
+  background: #229954; /* Verde más oscuro */
+  transform: translateY(-2px);
+}
+
+.carrito-sidebar .cart-footer p {
+  margin-top: 10px;
+  color: #a1a1a1;
+  font-size: 0.85rem;
+}
+
+/* Contenedor del ítem */
+.cart-item {
+  background: #2a2a2a; /* Fondo oscuro elegante */
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.cart-item:hover {
+  background: #343434;
+  transform: translateY(-3px);
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Encabezado */
+.cart-item-header {
+  border-bottom: 1px solid #4a4a4a;
+  padding-bottom: 5px;
+}
+
+.item-type {
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  color: #e0e0e0;
+}
+
+.btn-outline-danger {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.btn-outline-danger:hover {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+/* Etiquetas */
+.item-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #c0c0c0;
+}
+
+/* Inputs */
+input[type="number"] {
+  border-radius: 5px;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  box-shadow: 0 0 5px #4caf50;
+}
+
+/* Pie del ítem */
+.cart-item-footer {
+  border-top: 1px solid #4a4a4a;
+  padding-top: 10px;
+}

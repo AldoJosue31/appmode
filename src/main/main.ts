@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import productosDB from './database';
 
 class AppUpdater {
   constructor() {
@@ -30,6 +31,8 @@ ipcMain.on('ipc-example', async (event, arg) => {
   console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
+
+
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -135,3 +138,30 @@ app
     });
   })
   .catch(console.log);
+
+  ipcMain.handle('obtener-productos', async () => {
+    return new Promise((resolve, reject) => {
+      productosDB.find({}, (err, docs) => {
+        if (err) reject(err);
+        else resolve(docs);
+      });
+    });
+  });
+
+  ipcMain.handle('actualizar-producto', async (_, id, datos) => {
+    return new Promise((resolve, reject) => {
+      productosDB.update({ _id: id }, { $set: datos }, {}, (err) => {
+        if (err) reject(err);
+        else resolve(true);
+      });
+    });
+  });
+  
+  ipcMain.handle('eliminar-producto', async (_, id) => {
+    return new Promise((resolve, reject) => {
+      productosDB.remove({ _id: id }, {}, (err) => {
+        if (err) reject(err);
+        else resolve(true);
+      });
+    });
+  });

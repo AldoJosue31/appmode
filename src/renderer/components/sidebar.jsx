@@ -52,7 +52,8 @@ const Sidebar = ({ onClose }) => {
         {/* Header del Sidebar */}
         <div className="sidebar-header text-center p-3">
           <i className="bi bi-lightning-fill fs-1 text-primary"></i>
-          {isOpen && <h4 className="text-white mt-2">Mi Sidebar</h4>}
+          {isOpen && <h4 className="text-white mt-2">Modelorama
+            Cumbres</h4>}
         </div>
 
         {/* Links del Sidebar */}

@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example';
+export type Channels = 'ipc-example' | 'obtener-productos' | 'actualizar-producto' | 'eliminar-producto';
 
 const electronHandler = {
   ipcRenderer: {
@@ -21,9 +21,28 @@ const electronHandler = {
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
+    invoke<T>(channel: string, ...args: unknown[]): Promise<T> {
+      return ipcRenderer.invoke(channel, ...args);
+    },
   },
 };
 
-contextBridge.exposeInMainWorld('electron', electronHandler);
+// Exponer nuevo manejador para NeDB
+const dbHandler = {
+  obtenerProductos: async (): Promise<any[]> => {
+    return await ipcRenderer.invoke('obtener-productos');
+  },
+  actualizarProducto: async (id: string, datos: object): Promise<boolean> => {
+    return await ipcRenderer.invoke('actualizar-producto', id, datos);
+  },
+  eliminarProducto: async (id: string): Promise<boolean> => {
+    return await ipcRenderer.invoke('eliminar-producto', id);
+  },
+};
 
-export type ElectronHandler = typeof electronHandler;
+// Combinar ambos manejadores
+contextBridge.exposeInMainWorld('electron', { ...electronHandler, dbHandler });
+
+export type ElectronHandler = typeof electronHandler & {
+  dbHandler: typeof dbHandler;
+};
