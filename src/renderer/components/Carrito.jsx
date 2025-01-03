@@ -13,11 +13,9 @@ const Carrito = ({ carrito, eliminarItem, actualizarCantidad }) => {
   const calcularTotal = () =>
     carrito.reduce((total, item) => {
       if (item.piezasPorCarton && item.precioPorCarton) {
-        // Si el producto se vende por cartón, calcular el total basado en el precio por cartón
-        return total + item.precioPorCarton * item.cantidad;
+        return total + (item.precioPorCarton || 0) * (item.cantidad || 0);
       } else {
-        // Caso contrario, usar el precio unitario
-        return total + item.precioPorUnidad * item.cantidad;
+        return total + (item.precioPorUnidad || 0) * (item.cantidad || 0);
       }
     }, 0);
 
@@ -30,8 +28,8 @@ const Carrito = ({ carrito, eliminarItem, actualizarCantidad }) => {
         <div>
           {carrito.map((item, index) => {
             const precioTexto = item.piezasPorCarton
-              ? `Cartón (${item.piezasPorCarton} piezas): $${item.precioPorCarton.toFixed(2)}`
-              : `Unidad: $${item.precioPorUnidad.toFixed(2)}`;
+              ? `Cartón (${item.piezasPorCarton} piezas): $${(item.precioPorCarton || 0).toFixed(2)}`
+              : `Unidad: $${(item.precioPorUnidad || 0).toFixed(2)}`;
 
             return (
               <div

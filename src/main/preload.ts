@@ -2,7 +2,7 @@
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
-export type Channels = 'ipc-example' | 'obtener-productos' | 'actualizar-producto' | 'eliminar-producto';
+export type Channels = 'ipc-example' | 'obtener-productos' | 'actualizar-producto' | 'eliminar-producto' | 'obtener-presentaciones' | 'agregar-producto';
 
 const electronHandler = {
   ipcRenderer: {
@@ -32,11 +32,17 @@ const dbHandler = {
   obtenerProductos: async (): Promise<any[]> => {
     return await ipcRenderer.invoke('obtener-productos');
   },
+  obtenerPresentaciones: async (): Promise<any[]> => {
+    return await ipcRenderer.invoke('obtener-presentaciones');
+  },
   actualizarProducto: async (id: string, datos: object): Promise<boolean> => {
     return await ipcRenderer.invoke('actualizar-producto', id, datos);
   },
   eliminarProducto: async (id: string): Promise<boolean> => {
     return await ipcRenderer.invoke('eliminar-producto', id);
+  },
+  agregarProducto: async (datos: object): Promise<any> => {
+    return await ipcRenderer.invoke('agregar-producto', datos);
   },
 };
 

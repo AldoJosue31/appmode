@@ -165,3 +165,23 @@ app
       });
     });
   });
+
+  // Manejador para obtener presentaciones
+ipcMain.handle('obtener-presentaciones', async () => {
+  return new Promise((resolve, reject) => {
+    presentacionesDB.find({}, (err, docs) => {
+      if (err) reject(err);
+      else resolve(docs);
+    });
+  });
+});
+
+ipcMain.handle('agregar-producto', async (_, datos) => {
+  return new Promise((resolve, reject) => {
+    productosDB.insert(datos, (err, newDoc) => {
+      if (err) reject(err);
+      else resolve(newDoc);
+    });
+  });
+});
+

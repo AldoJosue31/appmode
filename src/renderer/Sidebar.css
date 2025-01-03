@@ -88,3 +88,37 @@
     right: -12px;
   }
 }
+
+/* Sidebar Content */
+.sidebar-content {
+  height: 100%; /* Mantiene el contenido ocupando todo el espacio disponible */
+  overflow-y: auto; /* Permite el desplazamiento vertical */
+  overflow-x: hidden; /* Evita el desplazamiento horizontal */
+}
+
+/* Estilo opcional para el scroll */
+.sidebar-content::-webkit-scrollbar {
+  width: 8px; /* Ancho del scroll */
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background-color: #333; /* Color del scroll */
+  border-radius: 4px; /* Borde redondeado */
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Color del scroll al pasar el cursor */
+}
+
+/* Estilo mientras se arrastra un ícono */
+.dragging {
+  opacity: 0.5;
+}
+
+/* Estilo del área objetivo mientras se arrastra */
+.drag-over {
+  background-color: #444;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
