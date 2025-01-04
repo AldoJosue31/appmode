@@ -11,13 +11,9 @@ const Carrito = ({ carrito, eliminarItem, actualizarCantidad }) => {
   }, []);
 
   const calcularTotal = () =>
-    carrito.reduce((total, item) => {
-      if (item.piezasPorCarton && item.precioPorCarton) {
-        return total + (item.precioPorCarton || 0) * (item.cantidad || 0);
-      } else {
-        return total + (item.precioPorUnidad || 0) * (item.cantidad || 0);
-      }
-    }, 0);
+    carrito.reduce((total, item) => total + item.precioPorVenta, 0);
+
+  
 
   return (
     <div className={`carrito-sidebar ${visible ? "visible" : "hidden"}`}>
@@ -27,9 +23,12 @@ const Carrito = ({ carrito, eliminarItem, actualizarCantidad }) => {
       ) : (
         <div>
           {carrito.map((item, index) => {
-            const precioTexto = item.piezasPorCarton
-              ? `Cartón (${item.piezasPorCarton} piezas): $${(item.precioPorCarton || 0).toFixed(2)}`
-              : `Unidad: $${(item.precioPorUnidad || 0).toFixed(2)}`;
+const precioTexto = item.tipoVenta === "cartón"
+? `Precio por Cartón: $${(item.precioUnitario * 24).toFixed(2)}`
+: item.tipoVenta === "six"
+? `Precio por Six: $${(item.precioUnitario * 6).toFixed(2)}`
+: `Precio por Unidad: $${item.precioUnitario.toFixed(2)}`;
+
 
             return (
               <div
@@ -62,20 +61,25 @@ const Carrito = ({ carrito, eliminarItem, actualizarCantidad }) => {
                     </p>
                   )}
                   <p className="mb-1">
-                    <span className="item-label">Precio:</span> {precioTexto}
+                    <span className="item-label">Precio por unidad:</span>{" "}
+                    {precioTexto}
                   </p>
                 </div>
                 <div className="cart-item-footer d-flex justify-content-between align-items-center mt-3">
                   <span className="item-label">Cantidad:</span>
                   <input
-                    type="number"
-                    min="1"
-                    value={item.cantidad}
-                    onChange={(e) =>
-                      actualizarCantidad(index, parseInt(e.target.value, 10))
-                    }
-                    className="form-control form-control-sm bg-secondary text-light border-0 w-25 text-center"
-                  />
+  type="number"
+  min="1"
+  value={item.cantidad}
+  onChange={(e) => {
+    const nuevaCantidad = parseInt(e.target.value, 10);
+    if (!isNaN(nuevaCantidad)) {
+      actualizarCantidad(index, nuevaCantidad);
+    }
+  }}
+  className="form-control form-control-sm bg-secondary text-light border-0 w-25 text-center"
+/>
+
                 </div>
               </div>
             );

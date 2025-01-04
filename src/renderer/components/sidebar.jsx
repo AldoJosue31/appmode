@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import * as bootstrap from "bootstrap"; // Importar Bootstrap para los tooltips
 import "../Sidebar.css";
 
 const Sidebar = ({ onClose }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [links, setLinks] = useState([
     { id: 1, to: "/", icon: "bi-house-door-fill", label: "Home" },
     { id: 2, to: "/ventas", icon: "bi-cart-fill", label: "Ventas" },
@@ -19,11 +22,10 @@ const Sidebar = ({ onClose }) => {
     { id: 9, to: "/configuracion", icon: "bi-gear-fill", label: "Configuración" },
   ]);
   let tooltips = [];
+  let scrollTimeout = null;
 
-  // Alternar el sidebar entre abierto y cerrado
   const toggleSidebar = () => setIsOpen((prevState) => !prevState);
 
-  // Limpiar los tooltips existentes
   const handleLinkClick = () => {
     tooltips.forEach((tooltip) => tooltip.dispose?.());
     tooltips = [];
@@ -39,50 +41,55 @@ const Sidebar = ({ onClose }) => {
     return handleLinkClick;
   }, [isOpen]);
 
-  // Drag & Drop Handlers
-  const handleDragStart = (e, id) => {
-    e.dataTransfer.setData("text/plain", id);
-    e.currentTarget.classList.add("dragging");
-  };
+  useEffect(() => {
+    const currentIndex = links.findIndex((link) => link.to === location.pathname);
+    if (currentIndex !== -1 && currentIndex !== activeIndex) {
+      setActiveIndex(currentIndex);
+    }
+  }, [location.pathname, links, activeIndex]);
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.currentTarget.classList.add("drag-over");
-  };
+  const handleScroll = useCallback(
+    (e) => {
+      if (scrollTimeout) return;
 
-  const handleDragLeave = (e) => {
-    e.currentTarget.classList.remove("drag-over");
-  };
+      const delta = e.deltaY;
+      let newIndex = activeIndex;
 
-  const handleDrop = (e, targetId) => {
-    e.preventDefault();
-    const draggedId = parseInt(e.dataTransfer.getData("text/plain"), 10);
-    const draggedItem = links.find((link) => link.id === draggedId);
-    const targetIndex = links.findIndex((link) => link.id === targetId);
-    const updatedLinks = links.filter((link) => link.id !== draggedId);
-    updatedLinks.splice(targetIndex, 0, draggedItem);
-    setLinks(updatedLinks);
-    e.currentTarget.classList.remove("drag-over");
-  };
+      if (delta > 0 && activeIndex < links.length - 1) {
+        newIndex = activeIndex + 1;
+      } else if (delta < 0 && activeIndex > 0) {
+        newIndex = activeIndex - 1;
+      }
+
+      if (newIndex !== activeIndex) {
+        setActiveIndex(newIndex);
+        navigate(links[newIndex].to);
+      }
+
+      scrollTimeout = setTimeout(() => {
+        scrollTimeout = null;
+      }, 200);
+    },
+    [activeIndex, links, navigate]
+  );
 
   return (
-    <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
+    <div className={`sidebar ${isOpen ? "open" : "closed"}`} onWheel={handleScroll}>
       <div className="sidebar-content">
         <div className="sidebar-header text-center p-3">
           <i className="bi bi-lightning-fill fs-1 text-primary"></i>
           {isOpen && <h4 className="text-white mt-2">Modelorama Cumbres</h4>}
         </div>
         <nav className="nav flex-column mt-4">
-          {links.map(({ id, to, icon, label }) => (
+          {links.map(({ id, to, icon, label }, index) => (
             <Link
               key={id}
               to={to}
-              className="nav-link text-light py-3"
-              draggable
-              onDragStart={(e) => handleDragStart(e, id)}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, id)}
+              className={`nav-link text-light py-3 ${index === activeIndex ? "active" : ""}`}
+              onClick={() => {
+                setActiveIndex(index);
+                navigate(to);
+              }}
               {...(!isOpen && { "data-bs-toggle": "tooltip", "data-bs-placement": "right", title: label })}
             >
               <i className={`bi ${icon} fs-5`}></i>
@@ -90,6 +97,27 @@ const Sidebar = ({ onClose }) => {
             </Link>
           ))}
         </nav>
+
+        {/* Selector */}
+        <div className={`mt-auto p-3 ${isOpen ? "" : "text-center"}`}>
+          {isOpen ? (
+            <div className="form-group">
+              <label htmlFor="selector" className="text-light mb-2">
+                Atiende:
+              </label>
+              <select
+                id="selector"
+                className="form-select bg-dark text-light border-secondary"
+              >
+                <option value="1">Yamil</option>
+                <option value="2">Aldo</option>
+                <option value="3">Consuelo</option>
+              </select>
+            </div>
+          ) : (
+            <i className="bi bi-three-dots text-light fs-4"></i>
+          )}
+        </div>
       </div>
       <button className={`toggle-sidebar-btn ${isOpen ? "open" : "closed"}`} onClick={toggleSidebar}>
         <i className={`bi ${isOpen ? "bi-chevron-left" : "bi-chevron-right"}`}></i>

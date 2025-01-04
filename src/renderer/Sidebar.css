@@ -122,3 +122,9 @@
   transition: background-color 0.2s ease;
 }
 
+.nav-link.active {
+  background-color: #007bff;
+  color: #fff !important;
+}
+
+
