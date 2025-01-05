@@ -66,69 +66,133 @@ const Productos = () => {
     }
   };
 
+  const agregarProducto = async (nuevoProducto) => {
+    try {
+      await window.electron.dbHandler.agregarProducto(nuevoProducto);
+      cargarProductos();
+    } catch (error) {
+      console.error("Error al agregar producto:", error);
+    }
+  };
+
+  const agregarPresentacion = async (idProducto, nuevaPresentacion) => {
+    try {
+      const producto = productos.find((prod) => prod._id === idProducto);
+      if (producto) {
+        const productoActualizado = {
+          ...producto,
+          presentaciones: [...producto.presentaciones, nuevaPresentacion],
+        };
+
+        const exito = await window.electron.dbHandler.actualizarProducto(
+          idProducto,
+          productoActualizado
+        );
+
+        if (exito) cargarProductos();
+      }
+    } catch (error) {
+      console.error("Error al agregar presentación:", error);
+    }
+  };
+
   const cervezas = productos.filter((prod) => prod.tipo === "Cerveza");
+
+  // Función para filtrar productos por marca
+  const filtrarPorMarca = (marca) => {
+    return cervezas.filter((producto) => producto.marca === marca);
+  };
+
+  // Renderizar tabla para cada marca
+  const renderizarTablaPorMarca = (marca) => {
+    const productosMarca = filtrarPorMarca(marca);
+
+    return (
+      <div key={marca}>
+        <h4>{marca}</h4>
+        {productosMarca.length === 0 ? (
+          <p className="text-muted">No hay productos de {marca} registrados.</p>
+        ) : (
+          productosMarca.map((producto) => {
+            // Detectar columnas necesarias
+            const tienePrecioPorCarton = producto.presentaciones.some(
+              (p) => p.esRetornable && p.precioPorCarton
+            );
+            const tienePrecioPorSix = producto.presentaciones.some(
+              (p) => p.descuentoSixPack && p.precioPorSix
+            );
+
+            return (
+              <div key={producto.marca + producto.submarca}>
+                <h5>
+                  {producto.marca} - {producto.submarca}
+                </h5>
+                <table className="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Presentación</th>
+                      <th>Contenido</th>
+                      <th>Precio Unitario</th>
+                      {tienePrecioPorCarton && <th>Precio por Cartón</th>}
+                      {tienePrecioPorSix && <th>Precio por Six-Pack</th>}
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {producto.presentaciones.map((presentacion, index) => (
+                      <tr key={index}>
+                        <td>{presentacion.tipo}</td>
+                        <td>{presentacion.capacidad}</td>
+                        <td>${presentacion.precioUnitario.toFixed(2)}</td>
+                        {tienePrecioPorCarton && (
+                          <td>
+                            {presentacion.esRetornable
+                              ? `$${presentacion.precioPorCarton?.toFixed(2)}`
+                              : "-"}
+                          </td>
+                        )}
+                        {tienePrecioPorSix && (
+                          <td>
+                            {presentacion.descuentoSixPack
+                              ? `$${presentacion.precioPorSix?.toFixed(2)}`
+                              : "-"}
+                          </td>
+                        )}
+                        <td>
+                          <button
+                            className="btn btn-warning btn-sm me-2"
+                            onClick={() =>
+                              modificarPresentacion(producto, presentacion)
+                            }
+                          >
+                            Modificar
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => eliminarProducto(producto._id)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="main-content">
       <h1>Gestión de Productos</h1>
 
-      {/* Tabla para cervezas */}
-      <h4>Lista de Cervezas</h4>
-      {cervezas.length === 0 ? (
-        <p className="text-muted">No hay cervezas registradas.</p>
-      ) : (
-        cervezas.map((producto) => (
-          <div key={producto.marca + producto.submarca}>
-            <h5>
-              {producto.marca} - {producto.submarca}
-            </h5>
-            <table className="table table-bordered">
-              <thead>
-                <tr>
-                  <th>Presentación</th>
-                  <th>Capacidad</th>
-                  <th>Precio Unitario</th>
-                  <th>Precio por Cartón/Six-Pack</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {producto.presentaciones.map((presentacion, index) => (
-                  <tr key={index}>
-                    <td>{presentacion.tipo}</td>
-                    <td>{presentacion.capacidad}</td>
-                    <td>${presentacion.precioUnitario.toFixed(2)}</td>
-                    <td>
-                      {presentacion.esRetornable
-                        ? `$${presentacion.precioPorCarton?.toFixed(
-                            2
-                          )} por cartón`
-                        : presentacion.descuentoSixPack
-                        ? `$${presentacion.precioPorSix?.toFixed(2)} por Six-Pack`
-                        : "-"}
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-warning btn-sm me-2"
-                        onClick={() =>
-                          modificarPresentacion(producto, presentacion)
-                        }
-                      >
-                        Modificar
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() => eliminarProducto(producto._id)}
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ))
+      {/* Tablas para cada marca */}
+      {["Victoria", "Corona", "Modelo"].map((marca) =>
+        renderizarTablaPorMarca(marca)
       )}
 
       {/* Modal para modificar presentaciones */}

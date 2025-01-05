@@ -75,7 +75,7 @@ const Ventas = () => {
   };
 
   const agregarAlCarrito = () => {
-    const cantidadNumerica = parseInt(cantidad, 10);
+    const cantidadNumerica = parseInt(cantidad, 10); // Convertir cantidad a número
     if (
       tipo &&
       marcaSeleccionada &&
@@ -84,28 +84,36 @@ const Ventas = () => {
       tipoVenta &&
       cantidadNumerica > 0
     ) {
+      // Buscar el producto seleccionado
       const productoSeleccionado = productos.find(
         (p) =>
           p.tipo === tipo &&
           p.marca === marcaSeleccionada &&
           p.submarca === subMarcaSeleccionada
       );
-
+  
       if (productoSeleccionado) {
+        // Buscar la presentación específica
         const presentacionSeleccionada = productoSeleccionado.presentaciones.find(
           (p) => p.capacidad === tamanoSeleccionado
         );
-
+  
         if (presentacionSeleccionada) {
           let precioPorVenta = 0;
-          if (tipoVenta === "six") {
-            precioPorVenta = presentacionSeleccionada.precioPorSix;
-          } else if (tipoVenta === "cartón") {
-            precioPorVenta = presentacionSeleccionada.precioPorCarton;
-          } else {
+  
+          // Verificar el tipo de venta y calcular el precio
+          if (tipoVenta === "six" && presentacionSeleccionada.precioPorSix) {
+            precioPorVenta = presentacionSeleccionada.precioPorSix * cantidadNumerica;
+          } else if (tipoVenta === "cartón" && presentacionSeleccionada.precioPorCarton) {
+            precioPorVenta = presentacionSeleccionada.precioPorCarton * cantidadNumerica;
+          } else if (presentacionSeleccionada.precioUnitario) {
             precioPorVenta = presentacionSeleccionada.precioUnitario * cantidadNumerica;
+          } else {
+            alert("No se pudo calcular el precio. Verifica los datos del producto.");
+            return; // Salir si no hay precios válidos
           }
-
+  
+          // Crear el nuevo ítem para el carrito
           const nuevoItem = {
             tipo,
             marca: marcaSeleccionada,
@@ -116,15 +124,21 @@ const Ventas = () => {
             tipoVenta,
             precioPorVenta,
           };
-
+  
+          // Actualizar el carrito
           setCarrito([...carrito, nuevoItem]);
           limpiarSeleccion();
         } else {
           alert("No se encontró la presentación seleccionada.");
         }
+      } else {
+        alert("No se encontró el producto seleccionado.");
       }
+    } else {
+      alert("Por favor completa todos los campos antes de agregar al carrito.");
     }
   };
+  
 
   const limpiarSeleccion = () => {
     setMarcaSeleccionada("");
@@ -136,33 +150,36 @@ const Ventas = () => {
   };
 
   const actualizarCantidad = (index, nuevaCantidad) => {
-    if (!nuevaCantidad || nuevaCantidad <= 0) return; // Validar que sea un número positivo
+    if (nuevaCantidad <= 0) return; // Evitar cantidades negativas o cero
   
     setCarrito((prevCarrito) => {
-      // Clonar el carrito para evitar mutaciones
       const nuevoCarrito = [...prevCarrito];
-      const item = { ...nuevoCarrito[index] }; // Clonar el objeto del producto
+      const item = nuevoCarrito[index];
   
-      // Calcular el nuevo precio basado en el tipo de venta
+      // Mantener el precio basado en el tipo de venta inicial
       let nuevoPrecioPorVenta = 0;
-      if (item.tipoVenta === "six") {
-        nuevoPrecioPorVenta = item.precioUnitario * 6 * nuevaCantidad; // Precio por six
-      } else if (item.tipoVenta === "cartón") {
-        nuevoPrecioPorVenta = item.precioUnitario * 24 * nuevaCantidad; // Precio por cartón
+      if (item.tipoVenta === "cartón") {
+        nuevoPrecioPorVenta = item.precioPorVenta / item.cantidad * nuevaCantidad;
+      } else if (item.tipoVenta === "six") {
+        nuevoPrecioPorVenta = item.precioPorVenta / item.cantidad * nuevaCantidad;
+      } else if (item.tipoVenta === "individual") {
+        nuevoPrecioPorVenta = item.precioPorVenta / item.cantidad * nuevaCantidad;
       } else {
-        nuevoPrecioPorVenta = item.precioUnitario * nuevaCantidad; // Precio por unidad
+        console.error("Tipo de venta desconocido:", item.tipoVenta);
+        return prevCarrito; // Salir sin cambios si no hay precios válidos
       }
   
-      // Actualizar el producto con la nueva cantidad y precio
+      // Actualizar cantidad y precio por venta
       item.cantidad = nuevaCantidad;
       item.precioPorVenta = nuevoPrecioPorVenta;
   
-      // Reemplazar el producto en el carrito
-      nuevoCarrito[index] = item;
-  
-      return nuevoCarrito; // Devolver el nuevo carrito actualizado
+      return nuevoCarrito;
     });
   };
+  
+  
+  
+  
   
   
   
