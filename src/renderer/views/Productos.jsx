@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal, Button, Form } from "react-bootstrap";
+import AccionMarcaModal from "../components/AccionMarcaModal";
 
 const Productos = () => {
   const [productos, setProductos] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [presentacionSeleccionada, setPresentacionSeleccionada] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarModalEliminar, setMostrarModalEliminar] = useState(false);
+  const [productoAEliminar, setProductoAEliminar] = useState(null);
 
   useEffect(() => {
     cargarProductos();
@@ -21,12 +24,21 @@ const Productos = () => {
     }
   };
 
-  const eliminarProducto = async (id) => {
-    try {
-      await window.electron.dbHandler.eliminarProducto(id);
-      cargarProductos();
-    } catch (error) {
-      console.error("Error al eliminar producto:", error);
+  const confirmarEliminarProducto = (producto) => {
+    setProductoAEliminar(producto);
+    setMostrarModalEliminar(true);
+  };
+
+  const eliminarProducto = async () => {
+    if (productoAEliminar) {
+      try {
+        await window.electron.dbHandler.eliminarProducto(productoAEliminar._id);
+        cargarProductos();
+        setMostrarModalEliminar(false);
+        setProductoAEliminar(null);
+      } catch (error) {
+        console.error("Error al eliminar producto:", error);
+      }
     }
   };
 
@@ -36,12 +48,18 @@ const Productos = () => {
     setMostrarModal(true);
   };
 
+  const validarPresentacion = (presentacion) => ({
+    ...presentacion,
+    precioPorCarton: presentacion.precioPorCarton || 0,
+    precioPorSix: presentacion.precioPorSix || 0,
+  });
+
   const guardarCambios = async () => {
     try {
       const nuevasPresentaciones = productoSeleccionado.presentaciones.map((p) =>
         p.tipo === presentacionSeleccionada.tipo &&
         p.capacidad === presentacionSeleccionada.capacidad
-          ? presentacionSeleccionada
+          ? validarPresentacion(presentacionSeleccionada)
           : p
       );
 
@@ -66,44 +84,10 @@ const Productos = () => {
     }
   };
 
-  const agregarProducto = async (nuevoProducto) => {
-    try {
-      await window.electron.dbHandler.agregarProducto(nuevoProducto);
-      cargarProductos();
-    } catch (error) {
-      console.error("Error al agregar producto:", error);
-    }
-  };
+  const obtenerMarcasUnicas = () => [...new Set(productos.map((producto) => producto.marca))];
 
-  const agregarPresentacion = async (idProducto, nuevaPresentacion) => {
-    try {
-      const producto = productos.find((prod) => prod._id === idProducto);
-      if (producto) {
-        const productoActualizado = {
-          ...producto,
-          presentaciones: [...producto.presentaciones, nuevaPresentacion],
-        };
+  const filtrarPorMarca = (marca) => productos.filter((producto) => producto.marca === marca);
 
-        const exito = await window.electron.dbHandler.actualizarProducto(
-          idProducto,
-          productoActualizado
-        );
-
-        if (exito) cargarProductos();
-      }
-    } catch (error) {
-      console.error("Error al agregar presentación:", error);
-    }
-  };
-
-  const cervezas = productos.filter((prod) => prod.tipo === "Cerveza");
-
-  // Función para filtrar productos por marca
-  const filtrarPorMarca = (marca) => {
-    return cervezas.filter((producto) => producto.marca === marca);
-  };
-
-  // Renderizar tabla para cada marca
   const renderizarTablaPorMarca = (marca) => {
     const productosMarca = filtrarPorMarca(marca);
 
@@ -114,16 +98,15 @@ const Productos = () => {
           <p className="text-muted">No hay productos de {marca} registrados.</p>
         ) : (
           productosMarca.map((producto) => {
-            // Detectar columnas necesarias
             const tienePrecioPorCarton = producto.presentaciones.some(
-              (p) => p.esRetornable && p.precioPorCarton
+              (p) => p.precioPorCarton && p.precioPorCarton !== 0
             );
             const tienePrecioPorSix = producto.presentaciones.some(
-              (p) => p.descuentoSixPack && p.precioPorSix
+              (p) => p.precioPorSix && p.precioPorSix !== 0
             );
 
             return (
-              <div key={producto.marca + producto.submarca}>
+              <div key={`${producto.marca}-${producto.submarca}`}>
                 <h5>
                   {producto.marca} - {producto.submarca}
                 </h5>
@@ -145,31 +128,29 @@ const Productos = () => {
                         <td>{presentacion.capacidad}</td>
                         <td>${presentacion.precioUnitario.toFixed(2)}</td>
                         {tienePrecioPorCarton && (
-                          <td>
-                            {presentacion.esRetornable
-                              ? `$${presentacion.precioPorCarton?.toFixed(2)}`
+                          <td className="text-center">
+                            {presentacion.precioPorCarton && presentacion.precioPorCarton !== 0
+                              ? `$${presentacion.precioPorCarton.toFixed(2)}`
                               : "-"}
                           </td>
                         )}
                         {tienePrecioPorSix && (
-                          <td>
-                            {presentacion.descuentoSixPack
-                              ? `$${presentacion.precioPorSix?.toFixed(2)}`
+                          <td className="text-center">
+                            {presentacion.precioPorSix && presentacion.precioPorSix !== 0
+                              ? `$${presentacion.precioPorSix.toFixed(2)}`
                               : "-"}
                           </td>
                         )}
                         <td>
                           <button
                             className="btn btn-warning btn-sm me-2"
-                            onClick={() =>
-                              modificarPresentacion(producto, presentacion)
-                            }
+                            onClick={() => modificarPresentacion(producto, presentacion)}
                           >
                             Modificar
                           </button>
                           <button
                             className="btn btn-danger btn-sm"
-                            onClick={() => eliminarProducto(producto._id)}
+                            onClick={() => confirmarEliminarProducto(producto)}
                           >
                             Eliminar
                           </button>
@@ -189,98 +170,114 @@ const Productos = () => {
   return (
     <div className="main-content">
       <h1>Gestión de Productos</h1>
+      <AccionMarcaModal productos={productos} cargarProductos={cargarProductos} />
 
-      {/* Tablas para cada marca */}
-      {["Victoria", "Corona", "Modelo"].map((marca) =>
-        renderizarTablaPorMarca(marca)
-      )}
+      {/* Tablas dinámicas por marca */}
+      {obtenerMarcasUnicas().map((marca) => renderizarTablaPorMarca(marca))}
 
       {/* Modal para modificar presentaciones */}
       <Modal show={mostrarModal} onHide={() => setMostrarModal(false)}>
+  <Modal.Header closeButton>
+    <Modal.Title>Modificar Presentación</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {presentacionSeleccionada && (
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Tipo</Form.Label>
+          <Form.Control
+            type="text"
+            value={presentacionSeleccionada.tipo}
+            onChange={(e) =>
+              setPresentacionSeleccionada({
+                ...presentacionSeleccionada,
+                tipo: e.target.value,
+              })
+            }
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Capacidad</Form.Label>
+          <Form.Control
+            type="text"
+            value={presentacionSeleccionada.capacidad}
+            onChange={(e) =>
+              setPresentacionSeleccionada({
+                ...presentacionSeleccionada,
+                capacidad: e.target.value,
+              })
+            }
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Precio Unitario</Form.Label>
+          <Form.Control
+            type="number"
+            value={presentacionSeleccionada.precioUnitario || ""}
+            onChange={(e) =>
+              setPresentacionSeleccionada({
+                ...presentacionSeleccionada,
+                precioUnitario: parseFloat(e.target.value),
+              })
+            }
+          />
+        </Form.Group>
+        {/* Campo para el precio por cartón */}
+        <Form.Group className="mb-3">
+          <Form.Label>Precio por Cartón</Form.Label>
+          <Form.Control
+            type="number"
+            value={presentacionSeleccionada.precioPorCarton || ""}
+            onChange={(e) =>
+              setPresentacionSeleccionada({
+                ...presentacionSeleccionada,
+                precioPorCarton: parseFloat(e.target.value) || 0,
+              })
+            }
+          />
+        </Form.Group>
+        {/* Campo para el precio por six-pack */}
+        <Form.Group className="mb-3">
+          <Form.Label>Precio por Six-Pack</Form.Label>
+          <Form.Control
+            type="number"
+            value={presentacionSeleccionada.precioPorSix || ""}
+            onChange={(e) =>
+              setPresentacionSeleccionada({
+                ...presentacionSeleccionada,
+                precioPorSix: parseFloat(e.target.value) || 0,
+              })
+            }
+          />
+        </Form.Group>
+      </Form>
+    )}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setMostrarModal(false)}>
+      Cancelar
+    </Button>
+    <Button variant="primary" onClick={guardarCambios}>
+      Guardar Cambios
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+
+      {/* Modal de confirmación para eliminar producto */}
+      <Modal show={mostrarModalEliminar} onHide={() => setMostrarModalEliminar(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Modificar Presentación</Modal.Title>
+          <Modal.Title>Confirmar Eliminación</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {presentacionSeleccionada && (
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Tipo</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={presentacionSeleccionada.tipo}
-                  onChange={(e) =>
-                    setPresentacionSeleccionada({
-                      ...presentacionSeleccionada,
-                      tipo: e.target.value,
-                    })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Capacidad</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={presentacionSeleccionada.capacidad}
-                  onChange={(e) =>
-                    setPresentacionSeleccionada({
-                      ...presentacionSeleccionada,
-                      capacidad: e.target.value,
-                    })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Precio Unitario</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={presentacionSeleccionada.precioUnitario}
-                  onChange={(e) =>
-                    setPresentacionSeleccionada({
-                      ...presentacionSeleccionada,
-                      precioUnitario: parseFloat(e.target.value),
-                    })
-                  }
-                />
-              </Form.Group>
-              {presentacionSeleccionada.esRetornable && (
-                <Form.Group className="mb-3">
-                  <Form.Label>Precio por Cartón</Form.Label>
-                  <Form.Control
-                    type="number"
-                    value={presentacionSeleccionada.precioPorCarton || ""}
-                    onChange={(e) =>
-                      setPresentacionSeleccionada({
-                        ...presentacionSeleccionada,
-                        precioPorCarton: parseFloat(e.target.value),
-                      })
-                    }
-                  />
-                </Form.Group>
-              )}
-              {presentacionSeleccionada.descuentoSixPack && (
-                <Form.Group className="mb-3">
-                  <Form.Label>Precio por Six-Pack</Form.Label>
-                  <Form.Control
-                    type="number"
-                    value={presentacionSeleccionada.precioPorSix || ""}
-                    onChange={(e) =>
-                      setPresentacionSeleccionada({
-                        ...presentacionSeleccionada,
-                        precioPorSix: parseFloat(e.target.value),
-                      })
-                    }
-                  />
-                </Form.Group>
-              )}
-            </Form>
-          )}
+          <p>¿Estás seguro de que deseas eliminar este producto?</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setMostrarModal(false)}>
+          <Button variant="secondary" onClick={() => setMostrarModalEliminar(false)}>
             Cancelar
           </Button>
-          <Button variant="primary" onClick={guardarCambios}>
-            Guardar Cambios
+          <Button variant="danger" onClick={eliminarProducto}>
+            Eliminar
           </Button>
         </Modal.Footer>
       </Modal>
